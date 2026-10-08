@@ -32,6 +32,7 @@ enum Theme {
 
     enum Radius {
         static let panel: CGFloat = 26
+        static let palette: CGFloat = 14
         static let row: CGFloat = 10
         static let formField: CGFloat = 12
         /// Emoji tiles are roomier than list rows, so their corners take one larger step.
@@ -111,7 +112,7 @@ enum Theme {
         static let dropGuideCombinedFlashTolerance: CGFloat = 6
         static let dropGuideFadeThreshold: CGFloat = 36
         static let dropGuideFadeDistance: CGFloat = 180
-        static let bottomBarHeight: CGFloat = 52
+        static let bottomBarHeight: CGFloat = 42
         /// A `BarButton`'s hover capsule, shared by the footer group and the header's filter.
         static let barButtonHeight: CGFloat = 28
         static let rowIcon: CGFloat = 24
@@ -377,7 +378,7 @@ enum Theme {
     /// System text styles (not hardcoded sizes) so the UI honors Dynamic Type.
     enum Typography {
         /// One size, two frameworks: `TextTrailingDragHandle` measures what the field renders.
-        static let searchFieldSize: CGFloat = 20
+        static let searchFieldSize: CGFloat = 18
         static let searchField = Font.system(size: searchFieldSize, weight: .regular)
         /// `NSFont` is not `Sendable`, hence the isolation; every reader is a view anyway.
         @MainActor static let searchFieldNSFont = NSFont.systemFont(
@@ -430,6 +431,12 @@ enum Theme {
 
         /// The ramp's inverse: the scrim darkens the dark surface and lightens the light one.
         static let panelScrim = adaptive(dark: .srgbInk(0, alpha: 0.40), light: .srgbInk(1, alpha: 0.55))
+        /// The palette window's flat base, so bars and scrims no longer reveal what scrolls beneath.
+        static let panelSurface = adaptive(
+            dark: .srgbInk(0.102, alpha: 1), light: .srgbInk(1, alpha: 1))
+        /// The palette's bottom bar: `panelSurface` lifted one step, as Raycast v1's footer is.
+        static let bottomBarSurface = adaptive(
+            dark: .srgbInk(0.137, alpha: 1), light: .srgbInk(0.965, alpha: 1))
         /// Modal separation inside Tinycast: the launcher recedes while its dialog is in front.
         static let dialogDimming = adaptive(
             dark: .srgbInk(0, alpha: 0.34), light: .srgbInk(0, alpha: 0.34))

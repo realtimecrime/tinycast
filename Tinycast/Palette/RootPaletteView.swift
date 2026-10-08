@@ -340,8 +340,7 @@ struct RootPaletteView: View {
                 )
                 // The window's frame is the size source, so the glass and clip stay matched.
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                .background(Theme.Colors.panelScrim)
-                .background(GlassEffectView())
+                .background(Theme.Colors.panelSurface)
                 .overlay {
                     Theme.Colors.dialogDimming
                         .opacity(core.isDimmingPaletteForDialog ? 1 : 0)
@@ -353,7 +352,7 @@ struct RootPaletteView: View {
                             ? Theme.Duration.dialogEnter : Theme.Duration.dialogExit),
                     value: core.isDimmingPaletteForDialog
                 )
-                .clipShape(RoundedRectangle(cornerRadius: metrics.radius.panel, style: .continuous))),
+                .clipShape(RoundedRectangle(cornerRadius: metrics.radius.palette, style: .continuous))),
             selection: sel)
     }
 
@@ -768,6 +767,13 @@ struct RootPaletteView: View {
         .frame(height: metrics.size.headerHeight)
         .padding(.top, metrics.size.headerPadding)
         .frame(maxWidth: .infinity)
+        .background(Theme.Colors.panelSurface)
+        .overlay(alignment: .bottom) {
+            // The compact bar has no list beneath it to divide from.
+            if !isCollapsed {
+                Rectangle().fill(Theme.Colors.separator).frame(height: Theme.Size.hairline)
+            }
+        }
         // Next turn, once the show's `land()` and search refocus are done, so neither undoes it.
         .onChange(of: vm.pendingArgumentEntryID) {
             Task { @MainActor in focusPendingArgument() }
@@ -934,6 +940,10 @@ struct RootPaletteView: View {
         .padding(.horizontal, metrics.spacing.md)
         .frame(height: metrics.size.bottomBarHeight)
         .frame(maxWidth: .infinity)
+        .background(Theme.Colors.bottomBarSurface)
+        .overlay(alignment: .top) {
+            Rectangle().fill(Theme.Colors.separator).frame(height: Theme.Size.hairline)
+        }
     }
 
     private var appMenuButton: some View {
@@ -942,11 +952,11 @@ struct RootPaletteView: View {
         }
     }
 
-    /// The footer control group: primary action and the Actions toggle sharing one glass capsule.
+    /// The footer's flat control group: primary action, a tick divider, then the Actions toggle.
     private func actionGroup(
         pillLabel: String, formPrimaryShortcut: Bool, primaryActionEnabled: Bool, showActions: Bool
     ) -> some View {
-        HStack(spacing: 2) {
+        HStack(spacing: metrics.spacing.xs) {
             BarButton(action: activateSelection) {
                 HStack(spacing: metrics.spacing.sm) {
                     Text(pillLabel)
@@ -954,31 +964,32 @@ struct RootPaletteView: View {
                         .foregroundStyle(pillTint)
                     if formPrimaryShortcut {
                         HStack(spacing: metrics.spacing.xxs) {
-                            KeyCapChip(text: "⌘", style: .outline)
-                            KeyCapChip(text: "↵", style: .outline)
+                            KeyCapChip(text: "⌘", style: .filled)
+                            KeyCapChip(text: "↵", style: .filled)
                         }
                     } else {
-                        KeyCapChip(text: "↵", style: .outline)
+                        KeyCapChip(text: "↵", style: .filled)
                     }
                 }
             }
             .disabled(!primaryActionEnabled)
             if showActions {
+                Rectangle()
+                    .fill(Theme.Colors.separator)
+                    .frame(width: metrics.spacing.xxs, height: metrics.spacing.lg)
                 BarButton(action: toggleActions) {
                     HStack(spacing: metrics.spacing.sm) {
                         Text("Actions")
                             .font(metrics.typography.bar)
                             .foregroundStyle(Theme.Colors.textSecondary)
                         HStack(spacing: metrics.spacing.xxs) {
-                            KeyCapChip(text: "⌘", style: .outline)
-                            KeyCapChip(text: "K", style: .outline)
+                            KeyCapChip(text: "⌘", style: .filled)
+                            KeyCapChip(text: "K", style: .filled)
                         }
                     }
                 }
             }
         }
-        .padding(metrics.spacing.xs)
-        .frosted(in: Capsule())
     }
 
     /// The one path opening the Actions menu, sampling the state its rows depend on.
@@ -1551,7 +1562,6 @@ private struct MenuCircleButton: View {
         }
         .buttonStyle(.plain)
         .onHover { hovered = $0 }
-        .frosted(in: Circle())
     }
 }
 

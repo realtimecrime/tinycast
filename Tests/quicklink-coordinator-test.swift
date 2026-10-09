@@ -12,6 +12,7 @@ struct QuicklinkCoordinatorTests {
         try await readableSelection()
         try await clipboardFallback()
         try await combinedArguments()
+        try await deeplinkContext()
         try await plainLink()
         try copying()
         try editing()
@@ -109,6 +110,19 @@ struct QuicklinkCoordinatorTests {
         expect(
             QuicklinkLauncher.opened.first?.link == "https://example.com/?q=Swift&site=swift.org",
             "selection and declared arguments resolve together")
+    }
+
+    static func deeplinkContext() async throws {
+        let fixture = try Fixture(
+            link: "tinycast://extensions/demo/demo/define?context=%7B%22input%22%3A%20%22{selection}%22%7D")
+        defer { fixture.cleanUp() }
+        fixture.injector.selection = "looked up"
+        fixture.coordinator.openQuicklink(id: fixture.link.id)
+        await waitForOpen()
+        expect(
+            QuicklinkLauncher.opened.first?.link
+                == "tinycast://extensions/demo/demo/define?context=%7B%22input%22%3A%20%22looked%20up%22%7D",
+            "a selection lands percent-encoded inside the deeplink's context JSON")
     }
 
     static func plainLink() async throws {

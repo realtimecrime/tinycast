@@ -606,8 +606,9 @@ opens their Settings pane so they can be enabled through the usual consent flow.
 
 `raycast://extensions/<owner>/<extension>/<command>` runs an installed command from outside the app —
 a browser link, another app, a Shortcut — and `tinycast://` mirrors it so our own links never depend
-on Raycast winning the scheme. Both accept Raycast's query parameters: `arguments` as URL-encoded
-JSON, `fallbackText`, and `launchType=background`, which only a no-view command receives — a view
+on Raycast winning the scheme. Both accept Raycast's query parameters: `arguments` and `context` as
+URL-encoded JSON — the command's arguments and the `launchContext` it reads from its launch props —
+plus `fallbackText`, and `launchType=background`, which only a no-view command receives — a view
 command always takes over the palette, so it launches as `userInitiated`. The owner is a hint: a
 scoped install matches by `owner/extension` first and falls back to the bare slug, so short links
 keep working. Anything else on a claimed scheme just reopens the palette, and an unknown command says

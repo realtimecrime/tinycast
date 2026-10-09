@@ -17,6 +17,7 @@ struct ExtensionDeepLink: Sendable, Equatable {
     let extensionName: String
     let commandName: String
     let arguments: [String: String]
+    let launchContext: [String: RenderValue]
     let fallbackText: String?
     let launchType: ExtensionLaunchType
 
@@ -77,12 +78,15 @@ struct ExtensionDeepLink: Sendable, Equatable {
         }
         guard !extensionName.isEmpty, !commandName.isEmpty else { return nil }
         var arguments: [String: String] = [:]
+        var launchContext: [String: RenderValue] = [:]
         var fallbackText: String?
         var launchType = ExtensionLaunchType.userInitiated
         for item in items {
             switch item.name.lowercased() {
             case "arguments":
                 if let raw = item.value { arguments = parseArguments(raw) }
+            case "context":
+                if let raw = item.value { launchContext = parseLaunchContext(raw) }
             case "fallbacktext":
                 fallbackText = item.value
             case "launchtype", "launch_type":
@@ -94,7 +98,8 @@ struct ExtensionDeepLink: Sendable, Equatable {
         return .command(
             ExtensionDeepLink(
                 ownerOrAuthor: ownerOrAuthor, extensionName: extensionName, commandName: commandName,
-                arguments: arguments, fallbackText: fallbackText, launchType: launchType))
+                arguments: arguments, launchContext: launchContext, fallbackText: fallbackText,
+                launchType: launchType))
     }
 
     /// Raycast sends one URL-encoded JSON object; anything else means no arguments, not a failure.
@@ -121,5 +126,14 @@ struct ExtensionDeepLink: Sendable, Equatable {
             }
         }
         return out
+    }
+
+    /// A launch context is arbitrary JSON
+    nonisolated static func parseLaunchContext(_ raw: String) -> [String: RenderValue] {
+        guard let data = raw.data(using: .utf8),
+            let json = try? JSONSerialization.jsonObject(with: data),
+            let dict = json as? [String: Any]
+        else { return [:] }
+        return dict.mapValues(RenderValue.init(json:))
     }
 }

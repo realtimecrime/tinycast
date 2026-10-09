@@ -966,6 +966,28 @@ struct ExtensionTests {
             "deeplink treats malformed arguments as none",
             ExtensionDeepLink.parseArguments("not-json") == [:])
 
+        // What a quicklink sends: `{selection}` expanded once, inside percent-encoded JSON.
+        let context = ExtensionDeepLink.parse(
+            url: URL(
+                string:
+                    "tinycast://extensions/demo/demo/define?context=%7B%22input%22%3A%20%22looked%20up%22%7D"
+            )!)
+        check(
+            "deeplink decodes the context JSON a quicklink sends",
+            context?.launchContext == ["input": .string("looked up")],
+            String(describing: context?.launchContext))
+        check(
+            "deeplink treats malformed context as none",
+            ExtensionDeepLink.parse(url: URL(string: "raycast://extensions/demo/search?context=not-json")!)?
+                .launchContext.isEmpty == true)
+        check("deeplink without context carries none", args?.launchContext.isEmpty == true)
+        let typedContext = ExtensionDeepLink.parseLaunchContext(#"{"count":3,"flag":true,"nested":{"a":1}}"#)
+        check(
+            "launch context values keep their JSON shape",
+            typedContext["count"] == .number(3) && typedContext["flag"] == .bool(true)
+                && typedContext["nested"] == .object(["a": .number(1)]),
+            String(describing: typedContext))
+
         let full = ExtensionDeepLink.parse(
             url: URL(
                 string: "raycast://extensions/demo/search?fallbackText=hello&launchType=background"
